@@ -1,5 +1,5 @@
 import './Book.css';
-import { useQuery, gql,useMutation } from '@apollo/client';
+import { useQuery, gql, useMutation, useSubscription } from '@apollo/client';
 import { Link, useLocation } from 'react-router-dom';
 
 export default function Books(props) {
@@ -16,10 +16,10 @@ export default function Books(props) {
       <div class="razmak">
           <NEW_BOOK/>
       </div>
-      <div>
+      <div class="razmak">
           <MOVE_BOOK/>
       </div>
-      <div>
+      <div class="razmak">
         <U_AUTHOR/>
       </div>
       
@@ -39,8 +39,8 @@ const GET_BOOKS = gql`
 }
 `;
 const ADD_BOOK = gql`
-  mutation updateAuthor($type: String! $Aid: Int!){
-    updateAuthor(name: $type authorId:$Aid)
+  mutation addBook($type: String! $Aid: Int!){
+    addBook(name: $type authorId:$Aid)
     {id}
   }
 `;
@@ -55,6 +55,14 @@ const UPDATE_AUTHOR = gql`
     updateAuthor(newName: $nname id:$type)
     {id}
   }
+`;
+const BOOK_SUBSCRIPTION = gql`
+subscription BookAdded{
+  BookAdded {
+    id
+    name
+  }
+}
 `;
 function refreshPage() {
   window.location.reload(true);
@@ -80,7 +88,7 @@ function NEW_BOOK() {
             input = node;
           }}
         />
-        <button class="dodaj_autora" onClick={refreshPage} type="submit">Dodaj knjigu</button>
+        <button class="dodaj_autora" type="submit">Dodaj knjigu</button>
       </form>
     </div>
   )
@@ -137,15 +145,45 @@ function U_AUTHOR() {
     </div>
   )
 }
-
+const array=[];
+function SUB() {
+  const { loading, data } = useSubscription(BOOK_SUBSCRIPTION);
+  if(!loading){
+    const book={name:data.BookAdded.name,id:data.BookAdded.id}
+    array.push(book)
+  }
+  if(!loading) return array.map(({ id, name}) => (
+    <div class="link_book"key={id}>
+        <Link class="link" to="/about" state={{ID: id}}>{name}</Link>
+    </div>
+    
+  ));
+}
 function DISPLAY_BOOKS() {
   const location = useLocation();
   const state = location.state;
-  const { loading, error, data } = useQuery(GET_BOOKS,{variables: {oznaka: state.ID}});
-
+  const { loading, error, data,subscribeToMore } = 
+  useQuery(GET_BOOKS,{variables: {oznaka: state.ID}});
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error :</p>;
-
+  subscribeToMore({
+    document: BOOK_SUBSCRIPTION,
+    updateQuery: (prev, { subscriptionData }) => {
+      if (!subscriptionData.data) return prev;
+      console.log(prev.author.books)
+      const brojac=prev.author.books.length+1;
+      const newbook = {count:brojac,__typename: "Books",name:subscriptionData.data.BookAdded.name,id:subscriptionData.data.BookAdded.id};
+      const exists = prev.author.books.find(
+         ({ id }) => id === newbook.id
+       );
+       if (exists) return prev;
+      return Object.assign({}, prev, {
+        author:{
+         books: [...prev.author.books,newbook],
+        }
+      });
+    }
+  });
   return data.author.books.map(({ id, name}) => (
     <div>
     <div class="link_book"key={id}>

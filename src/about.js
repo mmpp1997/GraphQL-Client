@@ -59,7 +59,7 @@ function U_BOOK() {
           }}
         />
         
-        <button class="dodaj_autora" onClick={refreshPage} type="submit">Izmjeni naziv</button>
+        <button class="dodaj_autora2" onClick={refreshPage} type="submit">Izmjeni naziv</button>
       </form>
     </div>
   )
@@ -78,7 +78,7 @@ function DISPLAY_INFO() {
         <h2>Autor: {data.book.author.name}</h2>
         <h2>Naziv: {data.book.name}</h2>
         <h2>Žanr: {data.book.genre}</h2>
-        <h2>Goidna: {data.book.year}</h2>  
+        <h2>Godina: {data.book.year}</h2>  
     </div>
   );
 }

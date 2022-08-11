@@ -1,5 +1,5 @@
 import './home.css';
-import { useQuery, gql,useMutation } from '@apollo/client';
+import { useQuery, gql,useMutation, useSubscription } from '@apollo/client';
 import React from "react";
 import { Link } from "react-router-dom";
 
@@ -43,12 +43,20 @@ const GET_AUTHORS = gql`
     }
   }
 `;
+const AUTHOR_SUBSCRIPTION = gql`
+subscription Subscription {
+  AuthorAdded {
+    id
+    name
+  }
+}
+`;
 function refreshPage() {
   window.location.reload(true);
 }
 function NEW_AUTHOR() {
   let input;
-  const [addAuthor, { data, loading, error }] = useMutation(ADD_AUTHOR);
+  const [addAuthor, {loading, error }] = useMutation(ADD_AUTHOR);
   if (loading) return 'Submitting...';
   if (error) return `Submission error! ${error.message}`;
   return (
@@ -65,7 +73,7 @@ function NEW_AUTHOR() {
             input = node;
           }}
         />
-        <button class="dodaj_autora" onClick={refreshPage} type="submit">Dodaj autora</button>
+        <button class="dodaj_autora" type="submit">Dodaj autora</button>
       </form>
     </div>
   )
@@ -73,7 +81,7 @@ function NEW_AUTHOR() {
 
 function MOVE_AUTHOR() {
   let input;
-  const [removeAuthor, { data, loading, error }] = useMutation(REMOVE_AUTHOR);
+  const [removeAuthor, {loading, error }] = useMutation(REMOVE_AUTHOR);
   if (loading) return 'Submitting...';
   if (error) return `Submission error! ${error.message}`;
   return (
@@ -96,14 +104,30 @@ function MOVE_AUTHOR() {
   )
 }
 function DISPLAY_AUTHORS() {
-  const { loading, error, data } = useQuery(GET_AUTHORS);
+  const { loading, error, data,subscribeToMore } = useQuery(GET_AUTHORS);
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error :</p>;
-
+  subscribeToMore({
+    document: AUTHOR_SUBSCRIPTION,
+    updateQuery: (prev, { subscriptionData }) => {
+      if (!subscriptionData.data) return prev;
+      const brojac=prev.authors.length+1;
+      const newauthor = {count:brojac,__typename: "Author",name:subscriptionData.data.AuthorAdded.name,id:subscriptionData.data.AuthorAdded.id};
+      const exists = prev.authors.find(
+         ({ id }) => id === newauthor.id
+       );
+       if (exists) return prev;
+      return Object.assign({}, prev, {
+         authors: [...prev.authors,newauthor],
+      });
+    }
+  });
   return data.authors.map(({ id, name}) => (
     <div class="link_home" key={id}>
       <Link class="link" to="/books" state={{AUTHOR: name,ID: id}}>{name}</Link>
     </div>
     
   ));
+  
 }
+
