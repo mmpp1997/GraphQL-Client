@@ -63,7 +63,7 @@ function U_BOOK() {
           }}
         />
 
-        <button class="dodaj_autora2" onClick={refreshPage} type="submit">
+        <button class="dodaj_autora" onClick={refreshPage} type="submit">
           Izmjeni naziv
         </button>
       </form>

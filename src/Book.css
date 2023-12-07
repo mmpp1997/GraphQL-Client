@@ -1,9 +1,9 @@
 .link_book {
-  border: 1px solid black;
+  border-radius: 20px;
   width: 395px;
   height: 70px;
   margin-bottom: 10px;
-  background-color: bisque;
+  background-color: #3081D0;
   vertical-align: middle;
   line-height: 70px;
   text-align: center;
@@ -11,20 +11,20 @@
 .link {
   text-decoration: none;
   color: "black";
-  font-family: "Courier New", Courier, monospace;
+  font-family: sans-serif;
 }
 .link:visited {
-  color: black;
+  color: whitesmoke;
 }
 .naslov {
-  font-family: "Courier New", Courier, monospace;
+  font-family: sans-serif;
   text-align: center;
   width: 395px;
 }
 .botun {
   width: 400px;
   height: 50px;
-  background-color: bisque;
+  background-color: #3081D0;
 }
 .botun_unos {
   margin-left: 90px;

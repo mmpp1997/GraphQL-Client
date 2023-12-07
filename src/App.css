@@ -9,11 +9,11 @@
 }
 .link {
   text-decoration: none;
-  color: "black";
+  color: whitesmoke;
   font-family: "Courier New", Courier, monospace;
 }
 .link:visited {
-  color: black;
+  color: whitesmoke;
 }
 .naslov {
   font-family: "Courier New", Courier, monospace;
